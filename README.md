@@ -4,6 +4,8 @@
 
 `testtime` provides `time.Now` for testing.
 
+https://play.golang.org/p/ML5nhtXLOWA
+
 ```go
 package main
 
@@ -12,7 +14,7 @@ import (
 	"time"
 	_ "unsafe" // for go:linkname
 
-	github.com/tenntenn/testtime
+	"github.com/tenntenn/testtime"
 )
 
 // replace time.Now
@@ -21,7 +23,7 @@ func now() time.Time {
 	return testtime.Now()
 }
 
-func f() {
+func main() {
 	func() {
 		// set zero value
 		testtime.Set(time.Time{})

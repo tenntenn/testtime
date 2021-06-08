@@ -14,6 +14,9 @@ func now() time.Time {
 	return testtime.Now()
 }
 
+// just use
+var _ = now
+
 func Test(t *testing.T) {
 	func() {
 		testtime.Set(time.Time{})

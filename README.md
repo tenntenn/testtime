@@ -4,6 +4,8 @@
 
 `testtime` provides `time.Now` for testing.
 
+WARNING: This package is an experimental project.
+
 https://play.golang.org/p/ML5nhtXLOWA
 
 ```go

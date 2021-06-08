@@ -21,12 +21,12 @@ func Set(tm time.Time) bool {
 // Now returns a fixed time which is related with the caller function by Set.
 // If the caller is not related with  any fixed time, Now calls time.Now and returns its returned value.
 // Now can replaces time.Now by go:linkname as a following.
-// 
+//
 //	//go:linkname now time.Now
 //	func now() time.Time {
 //		return testtime.Now()
 //	}
-//	
+//
 //	func f() {
 //		func() {
 //			// set zero value
@@ -38,15 +38,18 @@ func Set(tm time.Time) bool {
 //		fmt.Println(time.Now().IsZero())
 //	}
 func Now() time.Time {
-	for i := 1; ; i++ {
-		name, ok := funcName(i)
-		if !ok {
-			break
-		}
-
-		tm, ok := timeMap.Load(name)
+	pcs := make([]uintptr, 10)
+	n := runtime.Callers(1, pcs)
+	frames := runtime.CallersFrames(pcs[:n])
+	for {
+		frame, hasNext := frames.Next()
+		tm, ok := timeMap.Load(frame.Function)
 		if ok {
 			return tm.(time.Time)
+		}
+
+		if !hasNext {
+			break
 		}
 	}
 	return time.Now()

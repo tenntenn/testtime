@@ -33,6 +33,9 @@ func Test(t *testing.T) {
 }
 ```
 
+The `gotesttime` command replace `time.Now` to `testtime.Now`.
+It can be used instead of the `go test` command.
+
 ```sh
 $ go install github.com/tenntenn/testtime/cmd/gotesttime@latest
 $ gotesttime

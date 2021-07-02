@@ -7,12 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/build"
 	"go/format"
 	"go/token"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/ast/inspector"

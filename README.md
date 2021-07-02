@@ -36,7 +36,8 @@ func Test(t *testing.T) {
 ```sh
 $ go install github.com/tenntenn/testtime/cmd/gotesttime@latest
 $ gotesttime
-false
+PASS
+ok  	main	0.156s
 ```
 
 <!-- links -->

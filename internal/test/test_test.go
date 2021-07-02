@@ -1,2 +1,0 @@
-// empty
-package test

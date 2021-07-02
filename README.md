@@ -6,35 +6,37 @@
 
 WARNING: This package is an experimental project.
 
-https://play.golang.org/p/ML5nhtXLOWA
-
 ```go
 package main
 
 import (
 	"fmt"
 	"time"
-	_ "unsafe" // for go:linkname
+	"testing"
 
 	"github.com/tenntenn/testtime"
 )
 
-// replace time.Now
-//go:linkname now time.Now
-func now() time.Time {
-	return testtime.Now()
-}
-
-func main() {
+func Test(t *testing.T) {
 	func() {
 		// set zero value
 		testtime.Set(time.Time{})
 		// true
-		fmt.Println(time.Now().IsZero())
+		if time.Now().IsZero {
+			t.Error("error")
+		}
 	}()
 	// false
-	fmt.Println(time.Now().IsZero())
+	if !time.Now().IsZero {
+		t.Error("error")
+	}
 }
+```
+
+```sh
+$ go install github.com/tenntenn/testtime/cmd/gotesttime@latest
+$ gotesttime
+false
 ```
 
 <!-- links -->

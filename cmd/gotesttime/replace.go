@@ -117,14 +117,3 @@ func file(files []*ast.File, pos token.Pos) *ast.File {
 	}
 	return nil
 }
-
-func gotag() (string, error) {
-	tags := build.Default.ReleaseTags
-	for i := len(tags) - 1; i >= 0; i-- {
-		version := tags[i]
-		if strings.HasPrefix(version, "go") {
-			return version, nil
-		}
-	}
-	return "", errors.New("there are not valid go tag")
-}

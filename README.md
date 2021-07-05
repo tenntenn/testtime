@@ -2,6 +2,8 @@
 
 [![pkg.go.dev][gopkg-badge]][gopkg]
 
+## How to use
+
 `testtime` package provides `testtime.Now()` and `testtime.SetTime()`.
 `testtime.SetTime()` stores a fixed time to a map with a caller of `testtime.SetTime()` as a key.
 When a caller or its ancestor caller of `testtime.Now()` is related to a fixed time by `testtime.SetTime()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
@@ -120,6 +122,10 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 >
 > // End of testtime's code
 ```
+
+## Examples
+
+See [_examples](./_examples) directory.
 
 <!-- links -->
 [gopkg]: https://pkg.go.dev/github.com/tenntenn/testtime

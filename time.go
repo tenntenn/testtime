@@ -3,6 +3,7 @@ package testtime
 import (
 	"runtime"
 	"sync"
+	"testing"
 	"time"
 	_ "unsafe" // for go:linkname
 )
@@ -10,13 +11,37 @@ import (
 //go:linkname timeMap time.timeMap
 var timeMap sync.Map
 
-// Set sets a fixed time with its caller.
-func Set(tm time.Time) bool {
+// SetTime sets a fixed time with its caller.
+func SetTime(t *testing.T, tm time.Time) bool {
+	t.Helper()
 	name, ok := funcName(1)
 	if !ok {
 		return false
 	}
-	timeMap.Store(name, tm)
+	timeMap.Store(name, func() time.Time {
+		return tm
+	})
+
+	t.Cleanup(func() {
+		timeMap.Delete(name)
+	})
+
+	return true
+}
+
+// SetFunc sets a function which returns time.Time.
+func SetFunc(t *testing.T, f func() time.Time) bool {
+	t.Helper()
+	name, ok := funcName(1)
+	if !ok {
+		return false
+	}
+	timeMap.Store(name, f)
+
+	t.Cleanup(func() {
+		timeMap.Delete(name)
+	})
+
 	return true
 }
 
@@ -28,9 +53,9 @@ func Now() time.Time {
 	frames := runtime.CallersFrames(pcs[:n])
 	for {
 		frame, hasNext := frames.Next()
-		tm, ok := timeMap.Load(frame.Function)
+		v, ok := timeMap.Load(frame.Function)
 		if ok {
-			return tm.(time.Time)
+			return v.(func() time.Time)()
 		}
 
 		if !hasNext {

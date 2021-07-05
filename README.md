@@ -20,12 +20,25 @@ import (
 func Test(t *testing.T) {
 	func() {
 		// set zero value
-		testtime.Set(time.Time{})
+		testtime.SetTime(t, time.Time{})
 		// true
 		if time.Now().IsZero {
 			t.Error("error")
 		}
 	}()
+
+	func() {
+		// set func which return zero value
+		f := func() time.Time {
+			return time.Time{}
+		}
+		testtime.SetFunc(t, f)
+		// true
+		if time.Now().IsZero {
+			t.Error("error")
+		}
+	}()
+
 	// false
 	if !time.Now().IsZero {
 		t.Error("error")
@@ -61,38 +74,38 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 ---
 > func _Now() Time {
 1521a1524,1556
-> 
+>
 > // It will be added to GOROOT/src/time/time.go.
-> 
-> var timeMap testtime_sync.Map
-> 
+>
+> var timeMap sync.Map
+>
 > func Now() Time {
 > 	pcs := make([]uintptr, 10)
-> 	n := testtime_runtime.Callers(1, pcs)
-> 	frames := testtime_runtime.CallersFrames(pcs[:n])
+> 	n := runtime.Callers(1, pcs)
+> 	frames := runtime.CallersFrames(pcs[:n])
 > 	for {
 > 		frame, hasNext := frames.Next()
-> 		tm, ok := timeMap.Load(frame.Function)
+> 		v, ok := timeMap.Load(frame.Function)
 > 		if ok {
-> 			return tm.(Time)
+> 			return v.(func() Time)()
 > 		}
-> 
+>
 > 		if !hasNext {
 > 			break
 > 		}
 > 	}
 > 	return _Now()
 > }
-> 
+>
 > func funcName(skip int) (string, bool) {
-> 	pc, _, _, ok := testtime_runtime.Caller(skip + 1)
+> 	pc, _, _, ok := runtime.Caller(skip + 1)
 > 	if !ok {
 > 		return "", false
 > 	}
-> 	fnc := testtime_runtime.FuncForPC(pc)
+> 	fnc := runtime.FuncForPC(pc)
 > 	return fnc.Name(), true
 > }
-> 
+>
 > // End of testtime's code
 ```
 

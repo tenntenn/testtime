@@ -10,7 +10,7 @@ import (
 
 func Test(t *testing.T) {
 	func() {
-		testtime.Set(time.Time{})
+		testtime.SetTime(t, time.Time{})
 		if !testtime.Now().IsZero() {
 			t.Error("testtime.Now() must be zero value")
 		}
@@ -34,6 +34,14 @@ func Test(t *testing.T) {
 		}()
 		<-done
 	}()
+
+	func() {
+		testtime.SetFunc(t, func() time.Time { return time.Time{} })
+		if !testtime.Now().IsZero() {
+			t.Error("testtime.Now() must be zero value")
+		}
+	}()
+
 	if testtime.Now().IsZero() {
 		t.Error("testtime.Now() must not be zero value")
 	}

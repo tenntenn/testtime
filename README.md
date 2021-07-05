@@ -26,6 +26,19 @@ func Test(t *testing.T) {
 			t.Error("error")
 		}
 	}()
+
+	func() {
+		// set func which return zero value
+		f := func() time.Time {
+			return time.Time{}
+		}
+		testtime.SetFunc(t, f)
+		// true
+		if time.Now().IsZero {
+			t.Error("error")
+		}
+	}()
+
 	// false
 	if !time.Now().IsZero {
 		t.Error("error")

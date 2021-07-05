@@ -78,6 +78,7 @@ func funcName(skip int) (string, bool) {
 func goroutineID() string {
 	var buf [64]byte
 	n := runtime.Stack(buf[:], false)
+	// 10: len("goroutine ")
 	for i := 10; i < n; i++ {
 		if buf[i] == ' ' {
 			return string(buf[10:i])

@@ -2,9 +2,9 @@
 
 [![pkg.go.dev][gopkg-badge]][gopkg]
 
-`testtime` package provides `timetime.Now()` and `testtime.Set()`.
+`testtime` package provides `testtime.Now()` and `testtime.Set()`.
 `testtime.Set()` stores a fixed time to a map with a caller of `testtime.Set()` as a key.
-When a caller or its ancestor caller of `timetime.Now()` is related to a fixed time by `testtime.Set()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
+When a caller or its ancestor caller of `testtime.Now()` is related to a fixed time by `testtime.Set()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
 
 ```go
 package main

@@ -1,11 +1,11 @@
 // It will be added to GOROOT/src/time/time.go.
 
-var timeMap sync.Map
+var timeMap testtime_sync.Map
 
 func Now() Time {
 	pcs := make([]uintptr, 10)
-	n := runtime.Callers(1, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
+	n := testtime_runtime.Callers(1, pcs)
+	frames := testtime_runtime.CallersFrames(pcs[:n])
 	for {
 		frame, hasNext := frames.Next()
 		tm, ok := timeMap.Load(frame.Function)
@@ -21,11 +21,11 @@ func Now() Time {
 }
 
 func funcName(skip int) (string, bool) {
-	pc, _, _, ok := runtime.Caller(skip + 1)
+	pc, _, _, ok := testtime_runtime.Caller(skip + 1)
 	if !ok {
 		return "", false
 	}
-	fnc := runtime.FuncForPC(pc)
+	fnc := testtime_runtime.FuncForPC(pc)
 	return fnc.Name(), true
 }
 

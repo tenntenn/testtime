@@ -2,8 +2,13 @@ package testtime
 
 import (
 	"runtime"
+	"sync"
 	"time"
+	_ "unsafe" // for go:linkname
 )
+
+//go:linkname timeMap time.timeMap
+var timeMap sync.Map
 
 // Set sets a fixed time with its caller.
 func Set(tm time.Time) bool {

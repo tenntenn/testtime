@@ -73,7 +73,7 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 < func Now() Time {
 ---
 > func _Now() Time {
-1521a1524,1556
+1521a1524,1568
 >
 > // It will be added to GOROOT/src/time/time.go.
 >
@@ -85,7 +85,7 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 > 	frames := runtime.CallersFrames(pcs[:n])
 > 	for {
 > 		frame, hasNext := frames.Next()
-> 		v, ok := timeMap.Load(frame.Function)
+> 		v, ok := timeMap.Load(goroutineID() + ":" + frame.Function)
 > 		if ok {
 > 			return v.(func() Time)()
 > 		}
@@ -103,7 +103,19 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 > 		return "", false
 > 	}
 > 	fnc := runtime.FuncForPC(pc)
-> 	return fnc.Name(), true
+>
+> 	return goroutineID() + ":" + fnc.Name(), true
+> }
+>
+> func goroutineID() string {
+> 	var buf [64]byte
+> 	n := runtime.Stack(buf[:], false)
+> 	for i := 10; i < n; i++ {
+> 		if buf[i] == ' ' {
+> 			return string(buf[10:i])
+> 		}
+> 	}
+> 	return ""
 > }
 >
 > // End of testtime's code

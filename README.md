@@ -2,9 +2,9 @@
 
 [![pkg.go.dev][gopkg-badge]][gopkg]
 
-`testtime` provides `time.Now` for testing.
-
-WARNING: This package is an experimental project.
+`testtime` package provides `timetime.Now()` and `testtime.Set()`.
+`testtime.Set()` stores a fixed time to a map with a caller of `testtime.Set()` as a key.
+When a caller or its ancestor caller of `timetime.Now()` is related to a fixed time by `testtime.Set()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
 
 ```go
 package main
@@ -43,7 +43,7 @@ PASS
 ok  	main	0.156s
 ```
 
-The `testtime` command creates overlay JSON file and a time.go file which is replaced `time.Now` in `$GOPATH/pkg/testtime` directory. The `testtime` command does not update these file without `-u` flag.
+The `testtime` command creates an overlay JSON file and `time.go` which is replaced `time.Now` in `$GOPATH/pkg/testtime` directory. The `testtime` command does not update these files without `-u` flag.
 
 ```sh
 $ cat `testtime` | jq

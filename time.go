@@ -21,8 +21,7 @@ func Set(tm time.Time) bool {
 }
 
 // Now returns a fixed time which is related with the caller function by Set.
-// If the caller is not related with  any fixed time, Now calls time.Now and returns its returned value.
-// Now can replaces time.Now by gotesttime command.
+// If the caller is not related with any fixed time, Now calls time.Now and returns its returned value.
 func Now() time.Time {
 	pcs := make([]uintptr, 10)
 	n := runtime.Callers(1, pcs)

@@ -9,6 +9,11 @@ import (
 )
 
 func TestDo(t *testing.T) {
+
+	if !testtime.Overlayed() {
+		t.Skip()
+	}
+
 	t.Parallel()
 	cases := []struct {
 		tm   string

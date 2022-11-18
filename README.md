@@ -5,8 +5,8 @@
 ## How to use
 
 `testtime` package provides `testtime.Now()` and `testtime.SetTime()`.
-`testtime.SetTime()` stores a fixed time to a map with a caller of `testtime.SetTime()` as a key.
-When a caller or its ancestor caller of `testtime.Now()` is related to a fixed time by `testtime.SetTime()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
+`testtime.SetTime()` stores a fixed time to a map with goroutine ID  of `testtime.SetTime()` as a key.
+When goroutine ID of `testtime.Now()` is related to a fixed time by `testtime.SetTime()`, it returns the fixed time otherwise it returns current time which is returned by `time.Now()`.
 
 ```go
 package main
@@ -20,16 +20,17 @@ import (
 )
 
 func Test(t *testing.T) {
-	func() {
+
+	t.Run("A", func(t *testing.T) {
 		// set zero value
 		testtime.SetTime(t, time.Time{})
 		// true
 		if time.Now().IsZero {
 			t.Error("error")
 		}
-	}()
+	})
 
-	func() {
+	t.Run("B", func(t *testing.T) {
 		// set func which return zero value
 		f := func() time.Time {
 			return time.Time{}
@@ -39,7 +40,7 @@ func Test(t *testing.T) {
 		if time.Now().IsZero {
 			t.Error("error")
 		}
-	}()
+	})
 
 	// false
 	if !time.Now().IsZero {
@@ -64,54 +65,37 @@ The `testtime` command creates an overlay JSON file and `time.go` which is repla
 $ cat `testtime` | jq
 {
   "Replace": {
-    "/usr/local/go/src/time/time.go": "/Users/tenntenn/go/pkg/testtime/time_go1.16.go"
+    "/usr/local/go/src/time/time.go": "/Users/tenntenn/go/pkg/testtime/time_go1.19.go"
   }
 }
-$ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.16.go
-79a80,81
+$ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.19.go
+82a83,84
 > 	"runtime"
 > 	"sync"
-1066c1068
+1089c1091
 < func Now() Time {
 ---
 > func _Now() Time {
-1521a1524,1568
->
+1619a1622,1649
+> 
 > // It will be added to GOROOT/src/time/time.go.
->
+> 
 > var timeMap sync.Map
->
+> 
+> // Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.
+> // If the current goroutine is not related with any fixed time or function, Now calls time.Now and returns its returned value.
 > func Now() Time {
-> 	pcs := make([]uintptr, 10)
-> 	n := runtime.Callers(1, pcs)
-> 	frames := runtime.CallersFrames(pcs[:n])
-> 	for {
-> 		frame, hasNext := frames.Next()
-> 		v, ok := timeMap.Load(goroutineID() + ":" + frame.Function)
-> 		if ok {
-> 			return v.(func() Time)()
-> 		}
->
-> 		if !hasNext {
-> 			break
-> 		}
+> 	v, ok := timeMap.Load(goroutineID())
+> 	if ok {
+> 		return v.(func() Time)()
 > 	}
 > 	return _Now()
 > }
->
-> func funcName(skip int) (string, bool) {
-> 	pc, _, _, ok := runtime.Caller(skip + 1)
-> 	if !ok {
-> 		return "", false
-> 	}
-> 	fnc := runtime.FuncForPC(pc)
->
-> 	return goroutineID() + ":" + fnc.Name(), true
-> }
->
+> 
 > func goroutineID() string {
 > 	var buf [64]byte
 > 	n := runtime.Stack(buf[:], false)
+> 	// 10: len("goroutine ")
 > 	for i := 10; i < n; i++ {
 > 		if buf[i] == ' ' {
 > 			return string(buf[10:i])
@@ -119,7 +103,7 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.1
 > 	}
 > 	return ""
 > }
->
+> 
 > // End of testtime's code
 ```
 

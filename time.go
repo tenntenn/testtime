@@ -11,68 +11,42 @@ import (
 //go:linkname timeMap time.timeMap
 var timeMap sync.Map
 
-// SetTime sets a fixed time with its caller.
-func SetTime(t *testing.T, tm time.Time) bool {
+// SetTime stores a fixed time which can be identified by the caller's goroutine.
+// The fixed time will be deleted at the end of test.
+func SetTime(t *testing.T, tm time.Time) {
 	t.Helper()
-	name, ok := funcName(1)
-	if !ok {
-		return false
-	}
-	timeMap.Store(name, func() time.Time {
+
+	key := goroutineID()
+	timeMap.Store(key, func() time.Time {
 		return tm
 	})
 
 	t.Cleanup(func() {
-		timeMap.Delete(name)
+		timeMap.Delete(key)
 	})
-
-	return true
 }
 
-// SetFunc sets a function which returns time.Time.
-func SetFunc(t *testing.T, f func() time.Time) bool {
+// SetFunc stores a function which returns time.Time which can be identified by the caller's goroutine.
+// The function will be deleted at the end of test.
+func SetFunc(t *testing.T, f func() time.Time) {
 	t.Helper()
-	name, ok := funcName(1)
-	if !ok {
-		return false
-	}
-	timeMap.Store(name, f)
+
+	key := goroutineID()
+	timeMap.Store(key, f)
 
 	t.Cleanup(func() {
-		timeMap.Delete(name)
+		timeMap.Delete(key)
 	})
-
-	return true
 }
 
-// Now returns a fixed time which is related with the caller function by Set.
-// If the caller is not related with any fixed time, Now calls time.Now and returns its returned value.
+// Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.
+// If the current goroutine is not related with any fixed time or function, Now calls time.Now and returns its returned value.
 func Now() time.Time {
-	pcs := make([]uintptr, 10)
-	n := runtime.Callers(1, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
-	for {
-		frame, hasNext := frames.Next()
-		v, ok := timeMap.Load(goroutineID() + ":" + frame.Function)
-		if ok {
-			return v.(func() time.Time)()
-		}
-
-		if !hasNext {
-			break
-		}
+	v, ok := timeMap.Load(goroutineID())
+	if ok {
+		return v.(func() time.Time)()
 	}
 	return time.Now()
-}
-
-func funcName(skip int) (string, bool) {
-	pc, _, _, ok := runtime.Caller(skip + 1)
-	if !ok {
-		return "", false
-	}
-	fnc := runtime.FuncForPC(pc)
-
-	return goroutineID() + ":" + fnc.Name(), true
 }
 
 func goroutineID() string {

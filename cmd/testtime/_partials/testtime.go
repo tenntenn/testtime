@@ -2,32 +2,14 @@
 
 var timeMap sync.Map
 
+// Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.
+// If the current goroutine is not related with any fixed time or function, Now calls time.Now and returns its returned value.
 func Now() Time {
-	pcs := make([]uintptr, 10)
-	n := runtime.Callers(1, pcs)
-	frames := runtime.CallersFrames(pcs[:n])
-	for {
-		frame, hasNext := frames.Next()
-		v, ok := timeMap.Load(goroutineID() + ":" + frame.Function)
-		if ok {
-			return v.(func() Time)()
-		}
-
-		if !hasNext {
-			break
-		}
+	v, ok := timeMap.Load(goroutineID())
+	if ok {
+		return v.(func() Time)()
 	}
 	return _Now()
-}
-
-func funcName(skip int) (string, bool) {
-	pc, _, _, ok := runtime.Caller(skip + 1)
-	if !ok {
-		return "", false
-	}
-	fnc := runtime.FuncForPC(pc)
-
-	return goroutineID() + ":" + fnc.Name(), true
 }
 
 func goroutineID() string {

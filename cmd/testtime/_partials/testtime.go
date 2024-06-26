@@ -1,5 +1,6 @@
 // It will be added to GOROOT/src/time/time.go.
 
+//go:linkname timeMap
 var timeMap sync.Map
 
 // Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.

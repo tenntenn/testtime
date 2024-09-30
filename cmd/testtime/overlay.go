@@ -13,8 +13,10 @@ import (
 	"go/token"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -22,12 +24,28 @@ import (
 //go:embed _partials/testtime.go
 var testtime string
 
-func createOverlay(update bool, dir string) (string, error) {
+func goVersion(modroot string) (string, error) {
+	var stdout bytes.Buffer
+	cmd := exec.Command("go", "env", "GOVERSION")
+	cmd.Dir = modroot
+	cmd.Stdout = &stdout
 
-	ver := build.Default.ReleaseTags[len(build.Default.ReleaseTags)-1]
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
 
-	overlay := filepath.Join(dir, fmt.Sprintf("overlay_%s.json", ver))
-	_, err := os.Stat(overlay)
+	return strings.TrimSpace(stdout.String()), nil
+}
+
+func createOverlay(update bool, modroot, output string) (string, error) {
+
+	ver, err := goVersion(modroot)
+	if err != nil {
+		return "", err
+	}
+
+	overlay := filepath.Join(output, fmt.Sprintf("overlay_%s.json", ver))
+	_, err = os.Stat(overlay)
 	switch {
 	case err == nil:
 		if !update {
@@ -37,7 +55,7 @@ func createOverlay(update bool, dir string) (string, error) {
 		return "", err
 	}
 
-	if err := os.MkdirAll(dir, 0o700); err != nil {
+	if err := os.MkdirAll(output, 0o700); err != nil {
 		return "", err
 	}
 
@@ -54,7 +72,7 @@ func createOverlay(update bool, dir string) (string, error) {
 		return "", err
 	}
 
-	new := filepath.Join(dir, fmt.Sprintf("time_%s.go", ver))
+	new := filepath.Join(output, fmt.Sprintf("time_%s.go", ver))
 	if err := os.WriteFile(new, src, 0o600); err != nil {
 		return "", err
 	}

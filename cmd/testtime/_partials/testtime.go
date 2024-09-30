@@ -1,5 +1,6 @@
 // It will be added to GOROOT/src/time/time.go.
 
+//go:linkname timeMap
 var timeMap sync.Map
 
 var overlayed = true

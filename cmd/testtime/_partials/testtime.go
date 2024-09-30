@@ -3,6 +3,9 @@
 //go:linkname timeMap
 var timeMap sync.Map
 
+//go:linkname overlayed
+var overlayed = true
+
 // Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.
 // If the current goroutine is not related with any fixed time or function, Now calls time.Now and returns its returned value.
 func Now() Time {

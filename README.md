@@ -65,21 +65,23 @@ The `testtime` command creates an overlay JSON file and `time.go` which is repla
 $ cat `testtime` | jq
 {
   "Replace": {
-    "/usr/local/go/src/time/time.go": "/Users/tenntenn/go/pkg/testtime/time_go1.19.go"
+    "/usr/local/go/src/time/time.go": "/Users/tenntenn/go/pkg/testtime/time_go1.23.1.go"
   }
 }
-$ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.19.go
-82a83,84
+
+$ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.23.1.go
+94a95,96
 > 	"runtime"
 > 	"sync"
-1089c1091
+1159c1161
 < func Now() Time {
 ---
 > func _Now() Time {
-1619a1622,1649
+1695a1698,1726
 > 
 > // It will be added to GOROOT/src/time/time.go.
 > 
+> //go:linkname timeMap
 > var timeMap sync.Map
 > 
 > // Now returns a fixed time which is related with the goroutine by SetTime or SetFunc.

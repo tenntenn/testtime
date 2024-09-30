@@ -1,6 +1,6 @@
 module github.com/tenntenn/testtime
 
-go 1.16
+go 1.23.1
 
 require golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e
 

@@ -110,7 +110,9 @@ func createOverlay(update bool, modroot, output string) (string, error) {
 
 func replaceTimeNow(w io.Writer, goroot string) (string, error) {
 	srcDir := filepath.Join(goroot, "src")
-	pkg, err := build.Default.Import("time", srcDir, 0)
+	ctx := build.Default
+	ctx.GOROOT = goroot
+	pkg, err := ctx.Import("time", srcDir, 0)
 	if err != nil {
 		return "", err
 	}

@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.3.1](https://github.com/tenntenn/testtime/compare/v0.3.0...v0.3.1) - 2024-10-23
+- Fix goroot by @tenntenn in https://github.com/tenntenn/testtime/pull/18
+- Update to v0.3.1 by @tenntenn in https://github.com/tenntenn/testtime/pull/17
+
 ## [v0.3.0](https://github.com/tenntenn/testtime/compare/v0.2.2...v0.3.0) - 2024-09-30
 - Add tagpr workflow by @tenntenn in https://github.com/tenntenn/testtime/pull/9
 - Remo function name from map keys by @tenntenn in https://github.com/tenntenn/testtime/pull/8

@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
@@ -27,6 +26,19 @@ var testtime string
 func goVersion(modroot string) (string, error) {
 	var stdout bytes.Buffer
 	cmd := exec.Command("go", "env", "GOVERSION")
+	cmd.Dir = modroot
+	cmd.Stdout = &stdout
+
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(stdout.String()), nil
+}
+
+func goRoot(modroot string) (string, error) {
+	var stdout bytes.Buffer
+	cmd := exec.Command("go", "env", "GOROOT")
 	cmd.Dir = modroot
 	cmd.Stdout = &stdout
 
@@ -59,8 +71,13 @@ func createOverlay(update bool, modroot, output string) (string, error) {
 		return "", err
 	}
 
+	goroot, err := goRoot(modroot)
+	if err != nil {
+		return "", err
+	}
+
 	var buf bytes.Buffer
-	old, err := replaceTimeNow(&buf)
+	old, err := replaceTimeNow(&buf, goroot)
 	if err != nil {
 		return "", err
 	}
@@ -91,8 +108,8 @@ func createOverlay(update bool, modroot, output string) (string, error) {
 	return overlay, nil
 }
 
-func replaceTimeNow(w io.Writer) (string, error) {
-	srcDir := filepath.Join(runtime.GOROOT(), "src")
+func replaceTimeNow(w io.Writer, goroot string) (string, error) {
+	srcDir := filepath.Join(goroot, "src")
 	pkg, err := build.Default.Import("time", srcDir, 0)
 	if err != nil {
 		return "", err

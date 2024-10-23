@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.3.2](https://github.com/tenntenn/testtime/compare/v0.3.1...v0.3.2) - 2024-10-23
+- Fix GOROOT of build.Context by @tenntenn in https://github.com/tenntenn/testtime/pull/20
+
 ## [v0.3.1](https://github.com/tenntenn/testtime/compare/v0.3.0...v0.3.1) - 2024-10-23
 - Fix goroot by @tenntenn in https://github.com/tenntenn/testtime/pull/18
 - Update to v0.3.1 by @tenntenn in https://github.com/tenntenn/testtime/pull/17

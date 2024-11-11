@@ -53,10 +53,16 @@ The `testtime` command replace `time.Now` to `testtime.Now`.
 It prints a file path of overlay JSON which can be given to `-overlay` flag of `go test` command.
 
 ```sh
-$ go install github.com/tenntenn/testtime/cmd/testtime@latest
-$ go test -overlay=`testtime`
+$ go test -overlay=$(go run github.com/tenntenn/testtime/cmd/testtime@latest)
 PASS
 ok  	main	0.156s
+```
+
+You can install `testtime' with the `go install' command.
+And don't forget to add the installed directory to the PATH environment variable.
+
+```sh
+$ go install github.com/tenntenn/testtime/cmd/testtime@latest
 ```
 
 The `testtime` command creates an overlay JSON file and `time.go` which is replaced `time.Now` in `$GOPATH/pkg/testtime` directory. The `testtime` command does not update these files without `-u` flag.

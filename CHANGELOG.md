@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.3.3](https://github.com/tenntenn/testtime/compare/v0.3.2...v0.3.3) - 2024-11-11
+- Fix README by @tenntenn in https://github.com/tenntenn/testtime/pull/22
+- Update README.md by @tenntenn in https://github.com/tenntenn/testtime/pull/24
+- Update README.md by @tenntenn in https://github.com/tenntenn/testtime/pull/25
+
 ## [v0.3.2](https://github.com/tenntenn/testtime/compare/v0.3.1...v0.3.2) - 2024-10-23
 - Fix GOROOT of build.Context by @tenntenn in https://github.com/tenntenn/testtime/pull/20
 

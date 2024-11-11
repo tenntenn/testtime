@@ -58,7 +58,7 @@ PASS
 ok  	main	0.156s
 ```
 
-You can install `testtime' with the `go install` command.
+You can install `testtime` with the `go install` command.
 And don't forget to add the installed directory to the PATH environment variable.
 
 ```sh

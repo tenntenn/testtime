@@ -33,7 +33,7 @@ func goVersion(modroot string) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimSpace(stdout.String()), nil
+	return strings.ReplaceAll(strings.TrimSpace(stdout.String()), " ", "_"), nil
 }
 
 func goRoot(modroot string) (string, error) {

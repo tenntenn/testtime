@@ -115,6 +115,23 @@ $ diff /usr/local/go/src/time/time.go /Users/tenntenn/go/pkg/testtime/time_go1.2
 > // End of testtime's code
 ```
 
+## When using GOTOOLCHAIN
+
+When using [GOTOOLCHAIN](https://go.dev/doc/toolchain) (Go 1.21+), the Go toolchain is installed under `GOMODCACHE`. Since the `-overlay` flag cannot replace files within `GOMODCACHE`, testtime does not work properly.
+
+To work around this issue, use the `-toolexec` flag with the `testtimeexec` command.
+
+```sh
+$ go install github.com/tenntenn/testtime/cmd/testtimeexec@latest
+$ go test -toolexec=testtimeexec ./...
+```
+
+`testtimeexec` performs the following:
+
+1. Executes `testtime` command to retrieve overlay information
+2. Modifies tool version output to isolate build cache
+3. Replaces source file paths when executing the `compile` command
+
 ## Examples
 
 See [_examples](./_examples) directory.

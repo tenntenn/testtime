@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -12,52 +13,96 @@ import (
 	"strings"
 )
 
+// Overlay represents the overlay JSON structure
+type Overlay struct {
+	Replace map[string]string `json:"Replace"`
+}
+
 func main() {
+	if err := run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr); err != nil {
+		if e, ok := err.(*exec.ExitError); ok {
+			os.Exit(e.ExitCode())
+		}
+		log.Fatal(err)
+	}
+}
+
+// loadOverlay executes testtime command and loads the overlay JSON
+func loadOverlay() (*Overlay, error) {
 	out, err := exec.Command("testtime").Output()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	data, err := os.ReadFile(strings.TrimSpace(string(out)))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	var overlay struct {
-		Replace map[string]string `json:"Replace"`
-	}
+	var overlay Overlay
 	if err := json.Unmarshal(data, &overlay); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	tool, args := os.Args[1], os.Args[2:]
+	return &overlay, nil
+}
+
+// modifyVersionOutput appends a hash of overlay to the tool's version output
+// This ensures build cache isolation for different overlay configurations
+func modifyVersionOutput(w io.Writer, tool string, args []string, overlay *Overlay) error {
+	out, err := exec.Command(tool, args...).Output()
+	if err != nil {
+		return err
+	}
+
+	h := fnv.New64()
+	json.NewEncoder(h).Encode(overlay.Replace)
+	fmt.Fprintf(w, "%s testtime:%x\n", strings.TrimSpace(string(out)), h.Sum64())
+	return nil
+}
+
+// rewriteCompileArgs rewrites source file paths in compile command arguments
+// according to the overlay Replace map
+func rewriteCompileArgs(args []string, overlay *Overlay) []string {
+	newArgs := make([]string, len(args))
+	copy(newArgs, args)
+
+	for i, arg := range newArgs {
+		if abs, err := filepath.Abs(arg); err == nil {
+			if to, ok := overlay.Replace[abs]; ok {
+				newArgs[i] = to
+			}
+		}
+	}
+	return newArgs
+}
+
+func run(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
+	if len(args) < 1 {
+		return fmt.Errorf("usage: testtimeexec <tool> [args...]")
+	}
+
+	overlay, err := loadOverlay()
+	if err != nil {
+		return err
+	}
+
+	tool := args[0]
+	toolArgs := args[1:]
 
 	// Modify version output to isolate build cache
-	if slices.Contains(args, "-V=full") {
-		out, _ := exec.Command(tool, args...).Output()
-		h := fnv.New64()
-		json.NewEncoder(h).Encode(overlay.Replace)
-		fmt.Printf("%s testtime:%x\n", strings.TrimSpace(string(out)), h.Sum64())
-		return
+	if slices.Contains(toolArgs, "-V=full") {
+		return modifyVersionOutput(stdout, tool, toolArgs, overlay)
 	}
 
 	// Rewrite source file paths for compile command
 	if filepath.Base(tool) == "compile" {
-		for i, arg := range args {
-			if abs, err := filepath.Abs(arg); err == nil {
-				if to, ok := overlay.Replace[abs]; ok {
-					args[i] = to
-				}
-			}
-		}
+		toolArgs = rewriteCompileArgs(toolArgs, overlay)
 	}
 
-	cmd := exec.Command(tool, args...)
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	if err := cmd.Run(); err != nil {
-		if e, ok := err.(*exec.ExitError); ok {
-			os.Exit(e.ExitCode())
-		}
-		os.Exit(1)
-	}
+	cmd := exec.Command(tool, toolArgs...)
+	cmd.Stdin = stdin
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	return cmd.Run()
 }
